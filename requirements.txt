@@ -1,0 +1,19 @@
+# The core needs only numpy (for the embedding vectors). AST parsing, the call graph,
+# the sandbox, and diffing are all stdlib. Everything else below is OPTIONAL.
+numpy>=1.24
+
+# The Streamlit chat-style demo (app.py):
+streamlit>=1.35
+
+# A real Claude tool-use loop (codeagent fix/ask/eval --real):
+# anthropic>=0.40
+
+# Real sentence embeddings instead of the offline hashing vectorizer:
+# sentence-transformers>=2.7
+
+# Multi-language parsing via tree-sitter (parse_repo_treesitter -- a documented stub):
+# tree_sitter>=0.21
+# tree_sitter_languages>=1.10
+
+# Tests:
+pytest>=8.0

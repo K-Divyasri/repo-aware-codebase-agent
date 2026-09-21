@@ -1,0 +1,33 @@
+# pyproject.toml describes the project in the modern, standard way. It lets you run
+# the tool as `codeagent ...` after `pip install -e .`, and it's where pytest reads its
+# settings.
+
+[project]
+name = "codeagent"
+version = "0.1.0"
+description = "A repo-aware agent that understands a Python codebase via AST-based symbol/call-graph retrieval, and can read, search, test, and propose fixes for it."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+# A real Claude tool-use loop (codeagent fix/ask/eval --real).
+llm = ["anthropic>=0.40"]
+# Real sentence embeddings instead of the offline hashing vectorizer.
+neural = ["sentence-transformers>=2.7"]
+# Multi-language parsing via tree-sitter (parse_repo_treesitter) -- a documented stub, not wired up.
+treesitter = ["tree_sitter>=0.21", "tree_sitter_languages>=1.10"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+codeagent = "codeagent.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
