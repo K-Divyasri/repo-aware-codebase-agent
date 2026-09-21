@@ -38,7 +38,7 @@ find it and trust it?). Tick every box.
 - [ ] **A live URL is in the README.** The Streamlit demo, offline, free, keyless. A
       clickable demo is what makes this land.
 - [ ] **Secrets are never committed.** `git ls-files | Select-String ".env"` shows only
-      `build_from_scratch/.env.example` -- never a bare `.env`. `ANTHROPIC_API_KEY`
+      `.env.example` -- never a bare `.env`. `ANTHROPIC_API_KEY`
       lives in the host's secrets vault, not the repo.
 - [ ] **CI is green.** `.github/workflows/ci.yml` runs `pytest -q` (42 tests) on every
       push and passes on a clean machine. All tests are offline, so CI is keyless.

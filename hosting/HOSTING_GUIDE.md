@@ -4,7 +4,7 @@ Three things you can put online, cheapest and easiest first:
 
 1. **The code on GitHub** — a clean repo with a README and green CI. Do this one no
    matter what.
-2. **The Streamlit demo** (`build_from_scratch/app.py`) on a free host — a clickable
+2. **The Streamlit demo** (`app.py`) on a free host - a clickable
    chat-style UI where you type a task ("the shipping tests are failing"), watch the
    agent's tool-call trace, and see the proposed diff. This is the link you paste in
    an interview.
@@ -23,26 +23,24 @@ calls a paid API unless you explicitly turn it on.
 ## The layout you're working with
 
 ```
-36-repo-aware-codebase-agent/    <- this whole folder becomes your GitHub repo
-├── build_from_scratch/          <- the real package lives here
-│   ├── app.py                   <- the Streamlit chat-style demo
-│   ├── codeagent/                <- the package (parsing, graph, index, agent, ...)
-│   ├── requirements.txt
-│   ├── tests/                   <- 42 offline tests
-│   ├── .env.example              <- safe to commit; the real .env is git-ignored
-│   └── .gitignore
+repo-aware-codebase-agent/       <- this whole folder is your GitHub repo
+├── app.py                       <- the Streamlit chat-style demo
+├── codeagent/                   <- the package (parsing, graph, index, agent, ...)
+├── requirements.txt
+├── tests/                       <- 42 offline tests
+├── .env.example                 <- safe to commit; the real .env is git-ignored
+├── .gitignore
 ├── generate_target_repo.py      <- writes data/target_repo/ (not committed, see below)
 ├── hosting/                     <- you are here (this guide, deploy checklist, CI)
-├── knowledge/  notebooks/  labs/ <- the learning material
 └── README.md                    <- the front page a recruiter opens
 ```
 
 Two things follow from this:
 
-- **GitHub gets the whole `36-repo-aware-codebase-agent/` folder.** The CI workflow and
+- **GitHub gets the whole repo folder.** The CI workflow and
   the root README are written assuming the repo root is this folder.
-- **The app *code* lives in `build_from_scratch/`.** When you point a host at it, the
-  main file path is `build_from_scratch/app.py`, not `app.py`.
+- **The app *code* lives at the repo root.** When you point a host at it, the
+  main file path is just `app.py`.
 - **`data/target_repo/` is generated, not committed** (it's in `.gitignore`). It's the
   tiny toy `cartlogic` codebase the agent operates on — regenerated automatically the
   first time any test, lab, notebook, or the Streamlit app needs it, by calling
@@ -72,9 +70,8 @@ git config --global user.email "mathuransada@gmail.com"
 
 ### Know what must NOT go in the repo
 
-The project ships two `.gitignore` files: one at the project root (`data/target_repo/`,
-`__pycache__/`, notebook checkpoints) and one inside `build_from_scratch/` (`.env`,
-`.pytest_cache/`, `.venv/`). Open both and confirm they list at least:
+The project ships one `.gitignore`, at the repo root (`.env`, `__pycache__/`,
+`.pytest_cache/`, `.venv/`, notebook checkpoints). Open it and confirm it lists at least:
 
 ```
 .env
@@ -93,11 +90,11 @@ blank values — which is safe and *is* meant to be committed.
 
 ### Make the repo and push
 
-Run these from the **project root** — the `36-repo-aware-codebase-agent/` folder, the
-one with `build_from_scratch/` and this `hosting/` folder inside it:
+Run these from the **project root** - the folder
+with `codeagent/` and this `hosting/` folder inside it:
 
 ```powershell
-cd ai\36-repo-aware-codebase-agent
+cd repo-aware-codebase-agent
 git init
 git add .
 git commit -m "Initial commit: repo-aware codebase agent (AST + call-graph retrieval, sandboxed fixes)"
@@ -111,7 +108,7 @@ git ls-files | Select-String ".env"
 ```
 
 The first should say `nothing to commit, working tree clean`. The second should show
-`build_from_scratch/.env.example` and **nothing else**. If a bare `.env` shows up, you
+`.env.example` and **nothing else**. If a bare `.env` shows up, you
 staged a secret — jump to *Committed .env by accident* at the bottom before you push.
 
 Then make an **empty** repo on github.com (the **+** menu, top-right → **New
@@ -145,7 +142,7 @@ git push
 ```
 
 Open the repo's **Actions** tab to watch it: checkout → install Python 3.12 → install
-`build_from_scratch/requirements.txt` → `pytest -q` in `build_from_scratch` (the
+`requirements.txt` → `pytest -q` (the
 `ensure_target_repo` fixture in `conftest.py` regenerates `data/target_repo/` on the
 runner automatically — nothing to commit or upload for that). It's **keyless** — every
 test runs offline. Green means all 42 passed on GitHub's machine. If it goes red, click
@@ -157,7 +154,7 @@ status badge**) and paste the markdown at the top of your root README.
 
 ## Step 1 — The Streamlit demo (the fastest public demo)
 
-`build_from_scratch/app.py` is a small Streamlit chat-style interface over the exact
+`app.py` is a small Streamlit chat-style interface over the exact
 same `CodebaseAgent` the CLI uses — pick or type a task, hit **Run agent**, and see the
 before/after test counts, the final message, the proposed diff, and the full tool-call
 trace (expandable per call). It defaults to the offline planner, so a hosted demo is
@@ -172,16 +169,15 @@ just pushed. **Hugging Face Spaces** also works and needs no card. Pick one.
    your repos.
 2. **Create app** → **Deploy a public app from GitHub**.
 3. **Repository:** `YOURNAME/repo-aware-codebase-agent`. **Branch:** `main`.
-4. **Main file path:** the key field — point it at **`build_from_scratch/app.py`** (not
-   just `app.py`; the app lives in the subfolder). Streamlit reads the
-   `requirements.txt` sitting next to it in `build_from_scratch/`.
+4. **Main file path:** the key field - point it at **`app.py`** (it sits at
+   the repo root). Streamlit reads the
+   `requirements.txt` sitting next to it at the repo root.
 5. **Deploy.** The first launch calls `generate_target_repo.py` automatically (that's
    the guard at the top of `app.py`), then you have a public `*.streamlit.app` URL that
    works immediately, offline, for anyone.
 
-If the build ever can't find dependencies, add a one-line `requirements.txt` at the
-repo root containing `-r build_from_scratch/requirements.txt`. Usually you won't need
-it.
+If the build ever can't find dependencies, confirm `requirements.txt` sits at the
+repo root next to `app.py`. Usually you won't need to.
 
 Secrets on Streamlit Cloud live under the app's **⋮** menu → **Settings** → **Secrets**
 (a small TOML editor). To let the hosted demo's "use real Claude" checkbox actually
@@ -203,13 +199,11 @@ A "Space" is a free, always-on little web app. Docs:
 1. Make a free account at <https://huggingface.co>, then avatar → **New Space**.
 2. **Space name:** `repo-aware-codebase-agent`. **Space SDK:** **Streamlit**. Free
    **CPU basic** hardware is plenty. **Create Space.**
-3. A Space is its own Git repo and expects the app at its **root**. Our files live in
-   `build_from_scratch/`, so upload *their contents* to the Space root: `app.py`, the
-   whole `codeagent/` folder, `generate_target_repo.py` (copy it up from the project
-   root too — `app.py`'s guard expects it one level up from itself, so if you flatten
-   the layout onto the Space root, also flatten that expectation: simplest is to drop
-   `generate_target_repo.py` next to `app.py` and change `cwd=_ROOT` to `cwd=_HERE.parent`
-   in the guard, or just pre-generate `data/target_repo/` locally and upload it too),
+3. A Space is its own Git repo and expects the app at its **root**. Our files already live at
+   the repo root, so upload them to the Space root: `app.py`, the
+   whole `codeagent/` folder, `generate_target_repo.py` (it goes right next to `app.py`,
+   which is where the guard in `app.py` looks for it, or just pre-generate
+   `data/target_repo/` locally and upload it too),
    and `requirements.txt`. Use the **Files** tab → **Add file** → **Upload files** and
    drag them in. Commit.
 4. The Space builds (watch **Logs**), installs `requirements.txt`, launches Streamlit,
@@ -221,8 +215,8 @@ Secrets on a Space: **Settings** → **Variables and secrets** → **New secret*
 restarts and picks it up from the environment.
 
 > Streamlit Cloud is the easier of the two here specifically because it deploys your
-> GitHub repo *as-is* (subfolder and all) — a Space wants the app at its own root, so
-> it needs the small reshuffle above. If you only host one, make it Path A.
+> GitHub repo *as-is* - a Space is its own separate repo, so
+> it needs the small copy-over above. If you only host one, make it Path A.
 
 ---
 
@@ -231,7 +225,7 @@ restarts and picks it up from the environment.
 By default, every task runs through the offline planner: run the tests, look up the one
 known bug the failing test maps to, apply its exact fix, verify. That's honest about
 being a lookup table, not reasoning — see `knowledge/01_why_this_project.md` and
-`build_from_scratch/codeagent/agent.py`'s module docstring for why that's a deliberate,
+`codeagent/agent.py`'s module docstring for why that's a deliberate,
 zero-cost default rather than a limitation to hide.
 
 Flip `real=True` (the "use real Claude" checkbox in the demo, or `--real` on the CLI)

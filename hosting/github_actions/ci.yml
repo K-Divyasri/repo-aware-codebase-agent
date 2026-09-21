@@ -11,8 +11,8 @@
 # Claude or any paid service, so this workflow is keyless.
 #
 # WHERE THIS FILE GOES: copy it to ".github/workflows/ci.yml" at the ROOT of your repo
-# (the repo root is the whole 36-repo-aware-codebase-agent/ folder, the one that
-# contains build_from_scratch/). GitHub only runs workflow files under .github/workflows/.
+# (the repo root is the whole repo-aware-codebase-agent/ folder, the one that
+# contains codeagent/). GitHub only runs workflow files under .github/workflows/.
 
 name: CI
 
@@ -35,19 +35,18 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: build_from_scratch/requirements.txt
+          cache-dependency-path: requirements.txt
 
-      # requirements.txt lives in build_from_scratch/, so give pip the full path.
+      # requirements.txt lives at the repo root.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r build_from_scratch/requirements.txt
+          pip install -r requirements.txt
 
-      # pyproject.toml inside build_from_scratch/ sets testpaths = ["tests"], so a
-      # bare `pytest -q` from that folder finds the whole suite. conftest.py's
+      # pyproject.toml at the repo root sets testpaths = ["tests"], so a
+      # bare `pytest -q` from the repo root finds the whole suite. conftest.py's
       # `ensure_target_repo` autouse fixture generates data/target_repo (the toy
       # `cartlogic` codebase, generated rather than committed) the first time any
       # test needs it, so a fresh checkout just works.
       - name: Run tests
-        working-directory: build_from_scratch
         run: pytest -q
